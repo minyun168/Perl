@@ -1,0 +1,624 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="pragma" content="no-cache"/>
+<meta http-equiv="cache-control" content="no-cache"/>
+<meta http-equiv="expires" content="0"/>
+<link href="style.css" rel="stylesheet" type="text/css"/>
+<title>CAリターゲティング配信設定</title>
+</head>
+<body onLoad = ShowItem('setBlogLimit');>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="jquery.simplemodal.js"></script>
+<script type="text/javascript" src="JSON.js"></script>
+<script type="text/javascript" src="prototype.js"></script>
+
+<script type="text/javascript">//<!--
+
+var Menu = { 'open' : '' };
+var duplicate = 1062;
+var norecord = 1000;
+
+function chkbtpremium(t){
+  if(t.checked){
+   document.nForm.elements['btpremium2'].checked = true;
+   document.nForm.elements['adctrl_retargeting'].checked = true; 
+   document.nForm.elements['behavior'].checked = true;
+  }else{
+   document.nForm.elements['btpremium2'].checked = false;
+   document.nForm.elements['adctrl_retargeting'].checked = false;
+   document.nForm.elements['behavior'].checked = false;
+  } 
+}
+
+function chkcaretarget(t){
+  if(t.checked){
+   document.nForm.elements['caretarget2'].checked = true;
+  }else{
+   document.nForm.elements['caretarget2'].checked = false;
+  }
+}
+
+
+function ShowItem(id) {
+//  Element.hide('indicator');
+  var MenuList = ["setBlogLimit"];
+  if(Menu.open == id && Menu.open != ''){
+    return;
+  }
+
+  for ( i = 0; MenuList.length > i; i++ ){
+      Element.hide(MenuList[i]);
+  }
+  if(id.length == 0){
+    return;
+  }
+
+
+  Element.show(id);
+  Menu.open = id;
+}
+
+function IsNumber(id){
+  value = $F(id);
+  if((value.match(/^[0-9]+$/g) == value)){
+    Element.setStyle(id,{ color:"black", backgroundColor:"#fff"});
+    return true;
+  }else{
+    Element.setStyle(id,{ color:"red", backgroundColor:"#ff6"});
+    return false;
+  }
+}
+
+function IsInput(id){
+  value = $F(id);
+  if((value.match(/[_\-a-zA-Z0-9]+/g) == value)){
+    Element.setStyle(id,{ color:"black", backgroundColor:"#fff"});
+    return true;
+  }else{
+    Element.setStyle(id,{ color:"red", backgroundColor:"#ff6"});
+    return false;
+  }
+}
+
+function IsNumber_spotseq(id){
+  value = $F(id);
+  if((value.match(/^[1-9][0-9]*$/g) == value)){
+    Element.setStyle(id,{ color:"black", backgroundColor:"#fff"});
+    return true;
+  }else{
+    Element.setStyle(id,{ color:"red", backgroundColor:"#ff6"});
+    return false;
+  }
+}
+
+
+function goSpotDetail(id){
+ if($(id).visible()){
+   $(id).hide();
+   $("spotidon").show();
+   $("spotidoff").hide(); 
+ }else{
+   $(id).show();
+　$("spotidoff").show();
+  $("spotidon").hide();
+ }
+ return true;
+}
+
+
+function goSetting(spotseq,spotsize){
+$('btp_group').focus();
+$('btp_group').value="BTP_"+spotsize+"_"+spotseq;
+$('cart_group').value="CART_"+spotsize+"_"+spotseq;
+$('spotseq').value=spotseq;
+$('blogspotiddetail').hide();
+ $("spotidon").show();
+ $("spotidoff").hide();
+
+$('totallimit').focus();
+ return true;
+}
+
+
+
+function SendData2(id,mode,ind,updatemode){
+  var valcnt = 0;
+  if(updatemode == "0"){
+    if(! IsNumber("l_blogid") ) valcnt++;
+    if ($F("l_blogid") == 0){
+                                 valcnt++;
+        $("l_blogid").value="";
+    }
+  }
+  if(updatemode == "3"){
+    if(! IsNumber("l_spotid") ) valcnt++;
+    if ($F("l_spotid") == 0){
+                                valcnt++;
+         $("l_spotid").value="";
+    }
+  }
+  if(mode == "insert"){
+    if(! IsNumber_spotseq("spotseq")) valcnt++;
+    if(! IsNumber("totallimit")) valcnt++;
+    if(! IsNumber("daylimit")) valcnt++;
+    if(! IsInput("btp_group")) valcnt++;
+    if(! IsInput("cart_group")) valcnt++;
+  }
+  if(mode == "update"){
+//    if(! IsNumber_spotseq("spotseq"+ind)) valcnt++;
+    if(! IsNumber("totallimit"+ind)) valcnt++;
+    if(! IsNumber("daylimit"+ind)) valcnt++;
+  }
+
+  if(valcnt > 0){
+    return;
+  }
+
+  if(mode == "insert"){
+    var mes = [ "媒体「",$("limitblogname").innerHTML,"」に\n",
+                "ＢＴグループ「",$F("btp_group"),"」\n",
+                "ＣＡグループ「",$F("cart_group"),"」\n",
+                "を登録します。よろしいですか？"].join("");
+    if(! window.confirm(mes)) return;
+  }
+
+  var message="";
+  if(updatemode == "1"){
+       message = "【トータル配信上限数:"+$F('totallimit'+ind)+",";
+       message += "１日配信上限数:"+$F('daylimit'+ind)+"】\n";
+  }
+
+  if(updatemode == "0"){
+   $('l_spotid').disabled = true;
+  }
+
+  if(updatemode == "3"){
+   $('l_blogid').disabled = true;
+  }
+  var url = 'bloglimit.cgi';
+  var pars = Form.serialize(id);
+  var myid= pars;
+
+if(updatemode == "2"){
+       message = "配信する商品を選択:";
+       var items= new Array('btpremium2','adctrl_retargeting','behavior','caretarget2','audience','match','retargeting','premium','category','mark_retargeting','potential_match','broadreach','impression');
+       var strTemp="";
+     for(var cnt=0;cnt<items.length;cnt++){
+       if (myid.include("&"+items[cnt]+"=on")){
+       // message+="\n"+strTemp+ itemsJA(items[cnt]);
+       }
+     }
+        message="【"+message+"】";
+        message+="\n";
+}
+
+
+  pars = pars + "&mode="+mode+"&id="+id+"&updatemode="+updatemode;
+
+  var myAjax2 = new Ajax.Request(
+                        url,
+                        {
+                          method: 'post',
+                          parameters: pars,
+                          onFailure : function( transport ){
+                                alert(message+"データ取得失敗しました");
+                                closeModal();
+                                Form.enable(id);
+			        return;
+
+	        	    },
+	        	  onException : function( transport, ex ){
+	            	    alert(ex);
+                            closeModal();
+                            Form.enable(id);
+	            	    return;
+	            	    },
+                          onLoading: function (transport){
+                                 Element.show('indicator');
+                                 openModal();
+                                     },
+                          onLoaded: function(){
+                                               Form.disable(id)
+                                              },
+                          onSuccess:  function(Request){
+                                closeModal();
+                                showResponse2(Request);
+                             if(message){
+                                alert(message+"成功に更新しました");
+                             }    
+                                }
+                        });
+}
+
+function itemsJA(myid){
+   var myid_ja="";
+ switch (myid){
+         case "match":
+           myid_ja="ターゲット";
+         break;
+
+         case "btpremium2":
+           myid_ja="行動ターゲティング";
+         break;
+
+         case "caretarget2":
+           myid_ja="ＣＡリターゲティング";
+         break;
+
+         case "retargeting":
+           myid_ja="通常リターゲティング";
+         break;
+
+         case "behavior":
+           myid_ja="旧行動ターゲティング";
+         break;
+
+         case "premium":
+           myid_ja="プレミアムリーチ";
+         break;
+
+         case "category":
+           myid_ja="カテゴリーマッチ";
+         break;
+
+         case "mark_retargeting":
+           myid_ja="マークリターゲティング";
+         break;
+      case "potential_match":
+           myid_ja="ポテンシャルマッチ";
+         break;
+
+        case "broadreach":
+           myid_ja="ブロードリーチ";
+         break;
+
+         case "impression":
+           myid_ja="CGMターゲティング";
+         break;
+
+         case "adctrl_retargeting":
+           myid_ja="CPC課金リターゲティング";
+         break;
+
+         case "audience":
+           myid_ja="オーディエンス";
+         break;
+
+         default:
+         break;
+      }
+
+ return  myid_ja+"=on";
+
+
+}
+
+function openModal(){
+     jQuery(function ($) {
+                $("#waiting").modal({
+                        position: ["45%","45%"],
+                        close:false,
+                        overlayClose:false,
+                        overlayCss:{backgroundColor:"#BEBEBE"},
+                        containerCss:{
+                    backgroundColor:"transparent",
+                        border:"none",
+                        height:50,
+                        width:50
+                        }
+                })
+       });
+
+}
+
+function closeModal(){
+   jQuery(function ($){
+              $.modal.close();
+          });
+
+}
+
+function showResponse2(Request){
+
+//  alert(Request.responseText);
+
+  var jsondata2 = JSON.Decode(Request.responseText);
+  var limitlist = [];
+  var classname = "";
+  var btpremiumchk = "";
+  var caretargetchk = "";
+  var matchchk="";
+  var  btpremium2chk="";
+  var  ca_retarget2chk="";
+  var  retargetingchk="";
+  var   behaviorchk="";
+  var   premiumchk="";
+  var  categorychk="";
+  var  mark_retargetingchk="";
+  var  potential_matchchk="";
+  var  broadreachchk="";
+  var impressionchk="";
+  var adctrl_retargetingchk="";
+  var spotleft="";
+  var a=[];
+  var camptypeinfo="";
+  if(jsondata2.message.length > 0){
+   //alert(jsondata2.message);
+    if( jsondata2.message == norecord ){
+      alert("対象blogid:"+$F("l_blogid")+"\nは存在しません!");
+      $("l_blogid").value = "";
+    }
+    if(jsondata2.message == duplicate){
+      var mes = [ "グループ「",$F("btp_group"),"」\n,「",$F("cart_group"),"」は登録済です。"].join("");
+      alert(mes);
+    }
+
+    if(jsondata2.message == 1063){
+      var mes = ["spotseq「",$F("spotseq"),"」は登録済かまたは存在しません"].join("");
+      alert(mes);
+    }
+
+    if(jsondata2.message == 1064){
+      var mes = ["spotseq「",$F("spotseq"),"」に関連するspotidは存在しません"].join("");
+      alert(mes);
+    }
+
+    if(jsondata2.message == 1065){
+      var mes = ["spotid「",$F("l_spotid"),"」は存在しません"].join("");
+      alert(mes);
+    }
+  }
+
+  $("limitblogname").innerHTML = jsondata2.blogname;
+  $("l_blogid").value = jsondata2.blogid;
+  $("bloglimitcount").innerHTML =  jsondata2.data.length + " 件";
+   var validspots=0;
+   var exceptspots=0;
+ for (i=0; jsondata2.data1.length > i; i++){
+  if(jsondata2.data1[i].spottype != undefined ){
+   spotleft += "[";
+   spotleft += "<input type=\"button\" value=\"設定\" onclick=\"goSetting('"+jsondata2.data1[i].spotseq + "','" + jsondata2.data1[i].spotsize + "');\"></button>";
+   spotleft += "掲載枠連番:"+jsondata2.data1[i].spotseq + ";";
+   spotleft += "掲載枠名称:"+jsondata2.data1[i].spotname + ";";
+   spotleft += "バナー配信内容:"+jsondata2.data1[i].spottype + ";";
+   spotleft += "掲載枠ID:" + jsondata2.data1[i].spotid + ";";
+   spotleft += "掲載枠サイズ"+jsondata2.data1[i].spotsize;
+
+   spotleft += "]<br>";
+   validspots++; 
+ }
+   exceptspots=jsondata2.data1.length-validspots;
+ } 
+//alert(spotleft);
+if(spotleft != ""){
+ $("blogspotidleft").innerHTML =  "全部：" + jsondata2.data1.length + " 件、設定可件数:"+validspots+"、設定不可件数:"+exceptspots+"<br>";
+ $("blogspotiddetail").innerHTML = spotleft;
+ $("spotidon").show();
+ $("spotidoff").hide();
+}else{
+ $("spotidon").hide();
+ $("spotidoff").hide();
+ $("blogspotidleft").innerHTML = "無し";
+ $("blogspotiddetail").hide(); 
+}
+   
+ limitlist.push(["<table>","<tr>"].join(""));
+  for (i=0; jsondata2.data.length > i; i++){
+    btpremiumchk = "";
+    caretargetchk = "";
+    matchchk=""
+    btpremium2chk="";
+    ca_retarget2chk="";
+    retargetingchk="";
+    behaviorchk="";
+    premiumchk="";
+    categorychk="";
+    mark_retargetingchk="";
+    potential_matchchk="";
+    broadreachchk="";
+    impressionchk="";
+    adctrl_retargetingchk="";
+    audiencechk="";
+    classname = "bloglimitl";
+    if(i%2 == 1){
+      classname = "bloglimitr";
+   }else{
+       limitlist.push(["</tr>","<tr>"].join(""));
+   }
+    
+
+ camptypeinfo=jsondata2.data[i].camptype;
+ if(camptypeinfo != ""){
+  a = camptypeinfo.split(",");
+ // alert("camptype="+jsondata2.data[i].camptype);
+  for ( j = 0; a.length > j; j++ ){
+      switch (a[j]){
+         case "match": 
+           matchchk="checked";
+         break;
+
+         case "btpremium":
+           btpremium2chk="checked";
+         break; 
+
+         case "ca_retargeting":
+           ca_retarget2chk="checked";
+         break; 
+
+         case "retargeting":
+           retargetingchk="checked";
+         break; 
+
+         case "behavior":
+           behaviorchk="checked";
+         break; 
+
+         case "premium":
+           premiumchk="checked";
+         break; 
+
+         case "category":
+           categorychk="checked";
+         break; 
+
+         case "mark_retargeting":
+           mark_retargetingchk="checked";
+         break; 
+
+         case "potential_match":
+           potential_matchchk="checked";
+         break; 
+
+        case "broadreach":
+           broadreachchk="checked";
+         break; 
+
+         case "impression":
+           impressionchk="checked";
+         break; 
+
+         case "adctrl_retargeting":
+           adctrl_retargetingchk="checked";
+         break;
+
+         case "audience":
+           audiencechk="checked";
+         break; 
+
+         default:
+         break;
+      }
+  }
+   }
+    limitlist.push
+    ([
+       "<td><div class='post ",classname,"' id=bloglimit",i,">\n",
+       "<h4>集計グループ</h4>\n",
+       "<input type='hidden' name='l_blogid' value='",jsondata2.data[i].blogid,"'>\n",
+       "<input type='hidden' name='ind' value='",i,"'>\n",
+       "<input type='hidden' name='simplemode' value='",jsondata2.simplemode,"'>\n",
+       "<table border=0 style='table-layout: fixed;'><tr><td>ＢＴプレミアムグループ</td><td>",jsondata2.data[i].btp_group,"<input type='hidden' name='btp_group' value='",jsondata2.data[i].btp_group,"'></td></tr>\n",
+       "<tr><td>ＣＡリターゲティンググループ</td><td>",jsondata2.data[i].cart_group,"<input type='hidden' name='cart_group' value='",jsondata2.data[i].cart_group,"'></td></tr>\n",
+        "<tr><td>掲載枠ID</td><td>",jsondata2.data[i].spotid,"<input type='hidden' name='spotid' id='spotid",i,"' value='",jsondata2.data[i].spotid,"'></td></tr>\n",
+       "<tr><td>掲載枠連番</td><td>",jsondata2.data[i].spotseq,"<input type='hidden' name='spotseq' id='spotseq",i,"' value='",jsondata2.data[i].spotseq,"'></td></tr>\n",
+       "<tr><td>掲載枠名称</td><td>",jsondata2.data[i].spotname,"</td></tr>\n",
+       "<tr><td>バナー配信内容</td><td>",jsondata2.data[i].spottype,"</td></tr>\n",
+       "<tr><td>掲載枠サイズ</td><td>",jsondata2.data[i].spotsize,"</td></tr>\n",
+       "<tr><td>トータル配信上限数</td><td>","<input type='text' name='totallimit' id='totallimit",i,"' value='",jsondata2.data[i].totallimit,"'></td></tr>\n",
+       "<tr><td>１日配信上限数</td><td>","<input type='text' name='daylimit' id='daylimit",i,"' value='",jsondata2.data[i].daylimit,"'></td></tr>\n",
+         "<tr><td></td><td><p><span class='button' onClick=SendData2('bloglimit",i,"','update',",i,",1) style={float:right}>更新</span></p></td></tr>",
+
+      "<tr><td>■配信する商品を選択</td><td></td></tr>\n",
+        "<tr><td valign='top'>",
+     "<div class='mad2'><table>",
+"<tr><td>行動ターゲティング</td><td><input type='checkbox' name='btpremium2' id='btpremium2' ",btpremium2chk,"></td></tr>",
+"<tr bgcolor='turquoise'><td>CPC課金リターゲティング</td><td><input type='checkbox' name='adctrl_retargeting' id='adctrl_retargeting' ",adctrl_retargetingchk,"></td></tr>",
+"<tr><td>旧行動ターゲティング</td><td><input type='checkbox' name='behavior' id='behavior' ",behaviorchk,"></td></tr>",
+"<tr bgcolor='turquoise'><td>ＣＡリターゲティング</td><td><input type='checkbox' name='caretarget2' id='caretarget2' ",ca_retarget2chk,"></td></tr>",
+"<tr><td>オーディエンス</td><td><input type='checkbox' name='audience' id='audience' ",audiencechk,"></td></tr>",
+
+"<tr bgcolor='turquoise'><td>ターゲット</td><td><input type='checkbox' name='match' id='match' ",matchchk,"></td></tr>",
+"<tr><td>通常リターゲティング</td><td><input type='checkbox' name='retargeting' id='retargeting' ",retargetingchk,"></td></tr>",
+"<tr bgcolor='turquoise'><td>プレミアムリーチ</td><td><input type='checkbox' name='premium' id='premium' ",premiumchk,"></td></tr>",
+"<tr><td>カテゴリーマッチ</td><td><input type='checkbox' name='category' id='category' ",categorychk,"></td></tr>",
+"<tr bgcolor='turquoise'><td>マークリターゲティング</td><td><input type='checkbox' name='mark_retargeting' id='mark_retargeting' ",mark_retargetingchk,"></td></tr>",
+"<tr><td>ポテンシャルマッチ</td><td><input type='checkbox' name='potential_match' id='potential_match' ",potential_matchchk,"></td></tr>",
+"<tr bgcolor='turquoise'><td>ブロードリーチ</td><td><input type='checkbox' name='broadreach' id='broadreach' ",broadreachchk,"></td></tr>","<tr><td>CGMターゲティング</td><td><input type='checkbox' name='impression' id='impression' ",impressionchk,"></td></tr>","</table></div>",
+        "</td><td></td></tr>",
+      "<tr><td><p><span class='button' onClick=SendData2('bloglimit",i,"','update',",i,",2) style={float:right}>更新</span></p></td><td></td></tr></table>",       "<h4>残数</h4>",
+       "<p>トータル: ",jsondata2.data[i].totalimp,"</p>",
+       "<p>本日: ",jsondata2.data[i].daylyimp,"</p>",
+       "</div></td>"
+     ].join(""));
+
+  }
+  limitlist.push(["<tr>","</table>"].join(""));
+
+  $("limitlist").innerHTML = limitlist.join("");
+  //alert(limitlist.join(""));
+  Form.enable(Menu.open);
+  Element.hide('indicator');
+//waiting modal closing
+  jQuery(function ($){
+              $.modal.close();
+       });
+
+}
+
+
+
+//-->
+</script>
+<H1>カンバン配信設定</H1>
+<p>
+<div id='navigation'>
+<a href="bloglimit.cgi?mode=publish">設定一覧のCSVダウンロード</a>
+<br>
+</div>
+<hr/>
+<span id='info'></span>
+<!--
+<img id='indicator' src='indicator_medium.gif' width='13' height='13' style='display:none;' />
+<img src='1x1.gif' width='13' height='13' />
+-->
+</p>
+
+<div id='setBlogLimit'>
+<div id='setBlogLimitblogid'>
+<H2>配信制御設定<img id='indicator' src='indicator_medium.gif' width='13' height='13' style='display:none;' /></H2>
+<ol>
+<li>媒体のセット</li>
+<h4>blogid : <input type='text' name='l_blogid' id='l_blogid'><span class='button' onClick=SendData2('setBlogLimitblogid','check',"",0)>検索</span>&nbsp;&nbsp;spotid : <input type='text' name='l_spotid' id='l_spotid'><span class='button' onClick=SendData2('setBlogLimitblogid','check',"",3)>検索</span></h4>
+<h4>媒体名 : <span id='limitblogname'></span></h4>
+<h4>グループ登録件数 : <span id='bloglimitcount'></span></h4>
+<h4>設定可能の掲載枠連番<span id='spotidon' style="display:none"><input type="button" value="開く" onclick="goSpotDetail('blogspotiddetail');"></span><span id='spotidoff' style="display:none"><input type="button" value="閉じる" onclick="goSpotDetail('blogspotiddetail');"></span>: <span id='blogspotidleft'></span></h4>
+<h4><span id='blogspotiddetail' style="display:none"></span></h4>
+<div id='bloglimit'>
+<li>グループの登録</li>
+<table >
+<tr><td>ＢＴプレミアムグループ</td><td><input type='text' name='btp_group' id='btp_group' size='30' value='BTP_0x0'></td></tr>
+<tr><td>ＣＡリターゲティンググループ</td><td><input type='text' name='cart_group' id='cart_group' size='30' value='CART_0x0'></td></tr>
+<tr><td>掲載枠連番</td><td><input type='text' name='spotseq' id='spotseq' value='1'></td></tr>
+<tr><td>トータル配信上限数</td><td><input type='text' name='totallimit' id='totallimit' value='0'></td></tr>
+<tr><td>１日配信上限数</td><td><input type='text' name='daylimit' id='daylimit' value='0'></td></tr>
+<tr><td>■配信する商品を選択</td><td></td></tr>
+<tr><td valign="top">
+
+<div class="mad2">
+mad2.0設定
+<FORM name="nForm"  style="margin: 0px;">
+<table>
+<tr><td>行動ターゲティング</td><td><input type='checkbox' name='btpremium2' id='btpremium2'></td></tr>
+<tr bgcolor='turquoise'><td>CPC課金リターゲティング</td><td><input type='checkbox' name='adctrl_retargeting' id='adctrl_retargeting'></td></tr>
+<tr><td>旧行動ターゲティング</td><td><input type='checkbox' name='behavior' id='behavior'>
+</td></tr>
+<tr bgcolor='turquoise'><td>ＣＡリターゲティング</td><td><input type='checkbox' name='caretarget2' id='caretarget2'></td></tr>
+<tr><td>オーディエンス</td><td><input type='checkbox' name='audience' id='audience'></td></tr>
+<tr bgcolor='turquoise'><td>ターゲット</td><td><input type='checkbox' name='match' id='match'></td></tr>
+<tr><td>通常リターゲティング</td><td><input type='checkbox' name='retargeting' id='retargeting'></td></tr>
+<tr bgcolor='turquoise'><td>プレミアムリーチ</td><td><input type='checkbox' name='premium' id='premium'></td></tr>
+<tr><td>カテゴリーマッチ</td><td><input type='checkbox' name='category' id='category'></td></tr>
+<tr bgcolor='turquoise'><td>マークリターゲティング</td><td><input type='checkbox' name='mark_retargeting' id='mark_retargeting'></td></tr>
+<tr><td>ポテンシャルマッチ</td><td><input type='checkbox' name='potential_match' id='potential_match'></td></tr>
+<tr bgcolor='turquoise'><td>ブロードリーチ</td><td><input type='checkbox' name='broadreach' id='broadreach'></td></tr>
+<tr><td>CGMターゲティング</td><td><input type='checkbox' name='impression' id='impression'></td></tr>
+</table>
+</FORM>
+</div>
+</td><td>
+</td></tr>
+<tr><td>　</td></tr>
+<tr><td colspan=2><div class='button' onClick=SendData2('setBlogLimitblogid','insert',"",0)>上記内容で設定する</div></td></tr>
+</table>
+<br/>
+<li>登録済グループ</li>
+</ol>
+</div>
+
+<span id='limitlist'></span>
+</div>
+</div>
+</body>
+</html>

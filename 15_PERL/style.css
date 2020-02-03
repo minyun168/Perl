@@ -1,0 +1,176 @@
+body {
+        font-size:15px;
+}
+
+p  {
+        font-size:13px;
+        margin:1px;
+}
+
+li {
+        font-weight: bold;
+}
+
+.mad1 {
+float:left;
+width:200px;
+border:solid;
+
+}
+
+.mad2 {
+float:left;
+width:200px;
+border: 5px solid;
+
+}
+
+
+#navigation span {  
+        font-size:13px;
+        color:#E51414;
+        text-align: left;
+        text-decoration: underline;
+        cursor: pointer;
+}
+
+#navigation a {
+        font-size:13px;
+        color:#E51414;
+}
+
+.button{
+        font-size:13px;
+        color: #fff;
+        border-top:3px double #9cf;
+        border-left:3px double #9cf;
+        border-right:3px double #4080BF;
+        border-bottom:3px double #4080BF;
+        background-color: #9cf;
+        margin-left: 10px;
+        text-align: center;
+        cursor: pointer;
+}
+
+.upldbutton{
+        font-size:13px;
+        color: #fff;
+        border-top:3px double #9cf;
+        border-left:3px double #9cf;
+        border-right:3px double #4080BF;
+        border-bottom:3px double #4080BF;
+        background-color: #9cf;
+        margin-left: 10px;
+        text-align: center;
+        cursor: pointer;
+        width: 150px;
+}
+
+.menubox {
+	position:absolute;
+	top:  15%;
+	left: 25%;
+	width: 50%;
+}
+
+.largebutton{
+        font-size:25px;
+        color: #fff;
+        border-top:3px double #9cf;
+        border-left:3px double #9cf;
+        border-right:3px double #4080BF;
+        border-bottom:3px double #4080BF;
+        background-color: #9cf;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        margin: 20px 2px;
+}
+
+.largebutton:hover{
+        color: #fff;
+        border-top:3px double #254A70;
+        border-left:3px double #254A70;
+        border-right:3px double #508AC5;
+        border-bottom:3px double #508AC5;
+        text-decoration: none;
+        background: #369;
+} 
+
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
+
+.post {
+        width: 450px;
+        border:1px solid #545454; 
+        line-height:18px;
+        margin-left:20px; 
+        margin-bottom:20px;
+        padding: 10px 10px 10px 10px;
+        clear:both;
+}
+
+#setBlogLimit {
+  clear:both; width:1000px; margin:0px 20px;
+}
+
+.bloglimitl {
+      display: block;
+      float:left;
+}
+
+.bloglimitr {
+      display: block; 
+      float:right;
+}
+
+td {
+      font-size:13px
+}
+
+.upld_num {
+      display:table-cell;
+      text-align: right;
+      width:20px;
+}
+
+.upld_value_a {
+      display:table-cell;
+      width:500px;
+      padding-left: 20px;
+}
+
+.upld_value_b {
+      display:table-cell;
+      width:300px;
+      padding-left: 20px;
+}
+
+
+.upld_nomal {
+      display:table-row;
+      width:1000px;
+      font-size:13px;
+      margin:1px;
+}
+
+.upld_err {
+      display:table-row;
+      color: red;
+      font-weight: bold;
+      width:1000px;
+      font-size:13px;
+      margin:1px;
+}
+
+.upld_exists {
+      display:table-row;
+      color: blue;
+      font-weight: bold;
+      width:1000px;
+      font-size:13px;
+      margin:1px;
+}
